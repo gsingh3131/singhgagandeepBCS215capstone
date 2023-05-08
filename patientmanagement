@@ -1,0 +1,135 @@
+#!/bin/bash
+
+
+
+# Clear the screen
+
+clear
+
+
+
+# Welcome screen
+
+echo "Welcome to the Patient Management System of Hospital X…"
+
+
+
+# Functions
+
+
+
+create_patient_id() {
+
+    last_name=$(echo $1 | cut -c1-4 | tr '[:lower:]' '[:upper:]')
+
+    first_name_initial=$(echo $2 | cut -c1 | tr '[:lower:]' '[:upper:]')
+
+    id_base="${last_name}${first_name_initial}"
+
+    
+
+    counter=1
+
+    patient_id="${id_base}${counter}"
+
+    
+
+    while grep -q "^${patient_id}," patient.csv; do
+
+        counter=$((counter+1))
+
+        patient_id="${id_base}${counter}"
+
+    done
+
+    
+
+    echo $patient_id
+
+}
+
+
+
+# Main Menu
+
+while true; do
+
+    echo "Main Menu:"
+
+    echo "[L/l]List patients"
+
+    echo "[A/a]Add a new patient"
+
+    echo "[S/s]Search patient"
+
+    echo "[D/d]Delete patient"
+
+    echo "[E/e]Exit"
+
+    read -p "Please make a selection: " choice
+
+
+
+    case $choice in
+
+        [Ll]* )
+
+            echo "Listing patients:"
+
+            sort -t',' -k2 patient.csv | tr ',' '\t' | tr '[:lower:]' '[:upper:]'
+
+            ;;
+
+        [Aa]* )
+
+            read -p "Enter first name: " first_name
+
+            read -p "Enter last name: " last_name
+
+            read -p "Enter phone number: " phone_number
+
+            patient_id=$(create_patient_id "$last_name" "$first_name")
+
+            echo "${patient_id},${first_name},${last_name},${phone_number}" >> patient.csv
+
+            echo "Thanks for entering the new patient information:"
+
+            echo "${first_name} ${last_name} ${phone_number} ${patient_id}"
+	    
+	    echo "The new patient is added to the patient records."
+
+            ;;
+
+        [Ss]* )
+
+            read -p "Enter the last name to search: " search_last_name
+
+            echo "Here are the matching records:"
+
+            grep -i "$search_last_name" patient.csv | sort -t',' -k2 | tr ',' '\t' | tr '[:lower:]' '[:upper:]'
+
+            ;;
+
+        [Dd]* )
+
+            read -p "Enter the last name to delete: " delete_last_name
+
+            grep -vi "$delete_last_name" patient.csv > patient.csv.tmp && mv patient.csv.tmp patient.csv
+
+            echo "Matching records deleted."
+
+            ;;
+
+        [Ee]* )
+
+            echo "Thanks for using this app."
+
+            break
+
+            ;;
+
+        * ) echo "Invalid option, please try again." ;;
+
+    esac
+
+done

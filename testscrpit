@@ -1,0 +1,6 @@
+echo $MY_VAR
+Ctrl+d
+chmod ugo+x testscript
+clear
+jjj
+cd
